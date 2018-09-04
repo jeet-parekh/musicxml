@@ -47,11 +47,6 @@ func ParseXMLBuffer(r io.Reader) (*MXML, error) {
 	return nil, errors.New("mxml: musicxml root element must be score-partwise or score-timewise")
 }
 
-// ParseXMLBytes parses musicxml data from []byte into a MXML struct.
-func ParseXMLBytes(data []byte) (*MXML, error) {
-	return ParseXMLBuffer(bytes.NewReader(data))
-}
-
 // ParseXMLFile parses musicxml data from a file into a MXML struct.
 func ParseXMLFile(filePath string) (*MXML, error) {
 	f, err := os.Open(filePath)
