@@ -6,8 +6,6 @@
 
 - To parse a MusicXML file, use
 
-  - `ParseXMLBytes(XMLData []byte)`.
-
   - `ParseXMLBuffer(XMLFileReader io.Reader)`.
 
   - `ParseXMLFile(XMLFilePath string)`.
