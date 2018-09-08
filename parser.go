@@ -4,10 +4,12 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/musica/musicxml/mxml"
 )
 
 const (
@@ -23,8 +25,8 @@ type mxlContainer struct {
 	} `xml:"rootfiles>rootfile,omitempty"`
 }
 
-// ParseXMLBuffer parses musicxml data from a io.Reader into a MXML struct.
-func ParseXMLBuffer(r io.Reader) (*MXML, error) {
+// ParseXMLBuffer parses MusicXML data from a io.Reader into a MXML struct.
+func parseXMLBuffer(r io.Reader) (*mxml.MXML, error) {
 	// The musicxml root may be either score-partwise or score-timewise.
 	// So keep a backup of the buffer for a second try.
 	var buf bytes.Buffer
@@ -37,6 +39,10 @@ func ParseXMLBuffer(r io.Reader) (*MXML, error) {
 		return mx, nil
 	}
 
+	// buf may not have all the data from the input io reader.
+	// so use ioutil.readall to dump the input io reader into the secondary buffer.
+	ioutil.ReadAll(tr)
+
 	mx, err = tryScoreTimewise(xml.NewDecoder(&buf))
 	if err != nil {
 		return nil, err
@@ -44,22 +50,22 @@ func ParseXMLBuffer(r io.Reader) (*MXML, error) {
 		return mx, nil
 	}
 
-	return nil, errors.New("mxml: musicxml root element must be score-partwise or score-timewise")
+	return nil, errorIncorrectRoot
 }
 
-// ParseXMLFile parses musicxml data from a file into a MXML struct.
-func ParseXMLFile(filePath string) (*MXML, error) {
+// ParseXMLFile parses MusicXML data from a file into a MXML struct.
+func parseXMLFile(filePath string) (*mxml.MXML, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	return ParseXMLBuffer(f)
+	return parseXMLBuffer(f)
 }
 
-// ParseMXLFile parses musicxml data from a mxl file into a MXML struct.
-func ParseMXLFile(filePath string) (*MXML, error) {
-	// TODO: confirm that MXL files contain only one uncompressed musicxml file.
+// ParseMXLFile parses MusicXML data from a mxl file into a MXML struct.
+func parseMXLFile(filePath string) (*mxml.MXML, error) {
+	// TODO: confirm that MXL files contain only one uncompressed MusicXML file.
 	z, err := zip.OpenReader(filePath)
 	if err != nil {
 		return nil, err
@@ -93,18 +99,18 @@ func ParseMXLFile(filePath string) (*MXML, error) {
 			}
 			defer x.Close()
 
-			return ParseXMLBuffer(x)
+			return parseXMLBuffer(x)
 		}
 	}
 
-	return nil, errors.New("mxml: no uncompressed musicxml file found in the mxl file")
+	return nil, errorEmptyMXL
 }
 
-func tryScorePartwise(d *xml.Decoder) (*MXML, error) {
-	score := &ScorePartwise{}
+func tryScorePartwise(d *xml.Decoder) (*mxml.MXML, error) {
+	score := &mxml.ScorePartwise{}
 	err := d.Decode(score)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), errorExpectedScorePartwise) {
+		if strings.HasPrefix(err.Error(), errorExpectedScorePartwise) {
 			return nil, nil
 		}
 		return nil, err
@@ -112,11 +118,11 @@ func tryScorePartwise(d *xml.Decoder) (*MXML, error) {
 	return score.ToMXML(), nil
 }
 
-func tryScoreTimewise(d *xml.Decoder) (*MXML, error) {
-	score := &ScoreTimewise{}
+func tryScoreTimewise(d *xml.Decoder) (*mxml.MXML, error) {
+	score := &mxml.ScoreTimewise{}
 	err := d.Decode(score)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), errorExpectedScoreTimewise) {
+		if strings.HasPrefix(err.Error(), errorExpectedScoreTimewise) {
 			return nil, nil
 		}
 		return nil, err
