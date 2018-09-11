@@ -24,7 +24,7 @@ func (m *MusicXML) MXML() *mxml.MXML {
 
 // SetMXML sets a MXML to the MusicXML struct.
 func (m *MusicXML) SetMXML(mx *mxml.MXML) (*MusicXML, error) {
-	if root := mx.Name(); root == "score-partwise" || root == "score-timewise" {
+	if root := mx.Name(); root == "score-partwise" {
 		m.musicXML = mx
 		return m.preprocess()
 	}
@@ -52,4 +52,9 @@ func (m *MusicXML) ParseXMLFile(filePath string) (*MusicXML, error) {
 // ParseMXLFile parses a MusicXML data from a mxl file into a MusicXML struct.
 func (m *MusicXML) ParseMXLFile(filePath string) (*MusicXML, error) {
 	return m.setMXML(parseMXLFile(filePath))
+}
+
+// XMLRoot returns the name of the root MusicXML element. Right now it can return only score-partwise.
+func (m *MusicXML) XMLRoot() string {
+	return m.meta.xmlRoot
 }

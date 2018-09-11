@@ -1,7 +1,7 @@
 package musicxml
 
 type musicXMLMeta struct {
-	rootElementName string
+	xmlRoot string
 }
 
 func newMusicXMLMeta() *musicXMLMeta {

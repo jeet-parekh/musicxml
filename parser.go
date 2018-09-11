@@ -2,20 +2,15 @@ package musicxml
 
 import (
 	"archive/zip"
-	"bytes"
 	"encoding/xml"
 	"io"
-	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/musica/musicxml/mxml"
 )
 
 const (
-	uncompressedXML            = "application/vnd.recordare.musicxml+xml"
-	errorExpectedScorePartwise = "expected element type <score-partwise>"
-	errorExpectedScoreTimewise = "expected element type <score-timewise>"
+	uncompressedXML = "application/vnd.recordare.musicxml+xml"
 )
 
 type mxlContainer struct {
@@ -27,30 +22,12 @@ type mxlContainer struct {
 
 // ParseXMLBuffer parses MusicXML data from a io.Reader into a MXML struct.
 func parseXMLBuffer(r io.Reader) (*mxml.MXML, error) {
-	// The musicxml root may be either score-partwise or score-timewise.
-	// So keep a backup of the buffer for a second try.
-	var buf bytes.Buffer
-	tr := io.TeeReader(r, &buf)
-
-	mx, err := tryScorePartwise(xml.NewDecoder(tr))
+	score := &mxml.ScorePartwise{}
+	err := xml.NewDecoder(r).Decode(score)
 	if err != nil {
 		return nil, err
-	} else if mx != nil {
-		return mx, nil
 	}
-
-	// buf may not have all the data from the input io reader.
-	// so use ioutil.readall to dump the input io reader into the secondary buffer.
-	ioutil.ReadAll(tr)
-
-	mx, err = tryScoreTimewise(xml.NewDecoder(&buf))
-	if err != nil {
-		return nil, err
-	} else if mx != nil {
-		return mx, nil
-	}
-
-	return nil, errorIncorrectRoot
+	return score.ToMXML(), nil
 }
 
 // ParseXMLFile parses MusicXML data from a file into a MXML struct.
@@ -104,28 +81,4 @@ func parseMXLFile(filePath string) (*mxml.MXML, error) {
 	}
 
 	return nil, errorEmptyMXL
-}
-
-func tryScorePartwise(d *xml.Decoder) (*mxml.MXML, error) {
-	score := &mxml.ScorePartwise{}
-	err := d.Decode(score)
-	if err != nil {
-		if strings.HasPrefix(err.Error(), errorExpectedScorePartwise) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return score.ToMXML(), nil
-}
-
-func tryScoreTimewise(d *xml.Decoder) (*mxml.MXML, error) {
-	score := &mxml.ScoreTimewise{}
-	err := d.Decode(score)
-	if err != nil {
-		if strings.HasPrefix(err.Error(), errorExpectedScoreTimewise) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return score.ToMXML(), nil
 }

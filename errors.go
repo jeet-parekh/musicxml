@@ -5,7 +5,9 @@ import "errors"
 var (
 	errorPrefix = "musicxml: "
 
-	errorIncorrectRoot = newError("MusicXML root element must be either score-partwise or score-timewise.")
+	errorScoreTimewise = newError("score-timewise is not yet supported.")
+
+	errorIncorrectRoot = newError("MusicXML root element must be score-partwise.")
 	errorEmptyMusicXML = newError("no MusicXML data found.")
 	errorEmptyMXL      = newError("no uncompressed MusicXML file found in the MXL file.")
 )
