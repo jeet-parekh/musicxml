@@ -53,8 +53,3 @@ func (m *MusicXML) ParseXMLFile(filePath string) (*MusicXML, error) {
 func (m *MusicXML) ParseMXLFile(filePath string) (*MusicXML, error) {
 	return m.setMXML(parseMXLFile(filePath))
 }
-
-// XMLRoot returns the name of the root MusicXML element. Right now it can return only score-partwise.
-func (m *MusicXML) XMLRoot() string {
-	return m.meta.xmlRoot
-}
