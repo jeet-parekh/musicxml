@@ -40,16 +40,16 @@ func (m *MusicXML) setMXML(mx *mxml.MXML, err error) (*MusicXML, error) {
 }
 
 // ParseXMLBuffer parses MusicXML data from a io.Reader into a MusicXML struct.
-func (m *MusicXML) ParseXMLBuffer(r io.Reader) (*MusicXML, error) {
-	return m.setMXML(parseXMLBuffer(r))
+func ParseXMLBuffer(r io.Reader) (*MusicXML, error) {
+	return NewMusicXML().setMXML(parseXMLBuffer(r))
 }
 
 // ParseXMLFile parses MusicXML data from a file into a MusicXML struct.
-func (m *MusicXML) ParseXMLFile(filePath string) (*MusicXML, error) {
-	return m.setMXML(parseXMLFile(filePath))
+func ParseXMLFile(filePath string) (*MusicXML, error) {
+	return NewMusicXML().setMXML(parseXMLFile(filePath))
 }
 
 // ParseMXLFile parses a MusicXML data from a mxl file into a MusicXML struct.
-func (m *MusicXML) ParseMXLFile(filePath string) (*MusicXML, error) {
-	return m.setMXML(parseMXLFile(filePath))
+func ParseMXLFile(filePath string) (*MusicXML, error) {
+	return NewMusicXML().setMXML(parseMXLFile(filePath))
 }

@@ -1,10 +1,11 @@
 package musicxml
 
 type musicXMLMeta struct {
-	xmlRoot   string
-	workTitle string
-	creators  []string
-	rights    []string
+	xmlRoot        string
+	workTitle      string
+	creators       []string
+	rights         []string
+	timeSignatures []*timeSignature
 }
 
 func newMusicXMLMeta() *musicXMLMeta {
